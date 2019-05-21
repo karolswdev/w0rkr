@@ -1,8 +1,7 @@
 {
   "profiles": {
     "w0rkr": {
-      "commandName": "Project",
-      "commandLineArgs": "/q"
+      "commandName": "Project"
     }
   }
 }

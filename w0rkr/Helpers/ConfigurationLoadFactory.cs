@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.Configuration;
-using w0rkr.Jobs;
+﻿using w0rkr.Jobs;
 
 namespace w0rkr.Helpers
 {

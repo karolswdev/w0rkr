@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using Figgle;
 using w0rkr.Configuration;
+using w0rkr.Main;
 
 namespace w0rkr
 {
@@ -12,6 +13,11 @@ namespace w0rkr
       {
          _startupOptions = Args.Configuration.Configure<StartupOptions>().CreateAndBind(args);
          ShowSplashScreen();
+
+         var executor = new Executor(_startupOptions);
+         executor.Start();
+         executor.PrintJobs();
+
          Console.ReadKey();
       }
 
@@ -21,7 +27,7 @@ namespace w0rkr
       {
          if (!_startupOptions.Quiet)
          {
-            Console.WriteLine(FiggleFonts.Slant.Render("w0rkr"));
+            Console.WriteLine(FiggleFonts.DotMatrix.Render("w0rkr"));
             Console.WriteLine($"Detected OS: {RuntimeInformation.OSDescription}");
             Console.WriteLine($"Started {DateTime.Now}");
          }

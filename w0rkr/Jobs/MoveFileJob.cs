@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
+using System.IO;
+using System.Threading;
 using Microsoft.Extensions.Configuration;
 using w0rkr.Helpers;
 
@@ -20,33 +19,129 @@ namespace w0rkr.Jobs
 
       #endregion
 
-      #region "Status related logic"
-         
+      #region "Status related fields"
+
+      private JobStatus _status;
+
       #endregion
 
-      public IConfigurationLoadResult LoadConfig(IConfiguration config)
+      #region "Break token"
+
+      private bool _stop;
+
+      #endregion
+
+      public JobStatus GetStatus()
       {
-         if (String.IsNullOrEmpty(config["MoveFile:FromDirectory"]))
+         return _status;
+      }
+
+      public MoveFileJob()
+      {
+         _status = JobStatus.Pending;
+      }
+
+      public IConfigurationLoadResult LoadConfig(IConfigurationRoot config)
+      {
+         _status = JobStatus.CorruptConfiguration;
+
+         #region "fromDirectory checks"
+
+         if (String.IsNullOrEmpty(config["MoveFile:fromDirectory"]))
          {
             return ConfigurationLoadFactory.Get(false, "the FromDirectory is not set for this job type.");
          }
 
-         if (String.IsNullOrEmpty(config["MoveFile:ToDirectory"]))
+         _fromDirectory = config["MoveFile:fromDirectory"];
+
+         if (!Directory.Exists(_fromDirectory))
+         {
+            return ConfigurationLoadFactory.Get(false, "the FromDirectory is not found on this filesystem.");
+         }
+
+         #endregion
+
+         #region "toDirectory checks"
+
+         _toDirectory = config["MoveFile:toDirectory"];
+
+         if (!Directory.Exists(_toDirectory))
+         {
+            return ConfigurationLoadFactory.Get(false, "the ToDirectory is not found on this filesystem.");
+         }
+
+         if (String.IsNullOrEmpty(config["MoveFile:toDirectory"]))
          {
             return ConfigurationLoadFactory.Get(false, "the ToDirectory is not set for this job type.");
          }
 
-         if (String.IsNullOrEmpty(config["MoveFile:ScanInterval"]))
+         #endregion
+
+         #region "scanInterval checks"
+
+         if (String.IsNullOrEmpty(config["MoveFile:scanInterval"]))
          {
             return ConfigurationLoadFactory.Get(false, "the ScanInterval is not set for this job type.");
          }
 
-         if (String.IsNullOrEmpty(config["MoveFile:FileFilter"])) 
+         if (!Int32.TryParse(config["MoveFile:scanInterval"], out int interval))
+         {
+            return ConfigurationLoadFactory.Get(false, "the ScanInterval is not correct.");
+         }
+
+         _scanInterval = interval;
+
+         #endregion
+
+         #region "fileFilter checks"
+
+         if (String.IsNullOrEmpty(config["MoveFile:fileFilter"])) 
          {
             return ConfigurationLoadFactory.Get(false, "the FileFilter is not set for this job type.");
          }
 
+         _fileFilter = config["MoveFile:fileFilter"];
+
+         #endregion
+
+        _status = JobStatus.Pending;
+
          return ConfigurationLoadFactory.Get(true, "All configuration loaded and ready to work.");
+      }
+
+      public void Start()
+      {
+         _status = JobStatus.Starting;
+
+         while (!_stop)
+         {
+            Thread.Sleep(_scanInterval);
+            // In case stop was set while wait time was hit
+            if (_stop)
+            {
+               break;
+            }
+            var files = Directory.GetFiles(_fromDirectory, _fileFilter);
+            foreach (var file in files)
+            {
+               var fi = new FileInfo(file);
+               try
+               {
+                  File.Move(file, $"{_toDirectory}/{fi.Name}");
+               }
+               catch (Exception)
+               {
+                  _status = JobStatus.Crashed;
+                  _stop = true;
+               }
+            }
+         }
+      }
+
+      public void Stop()
+      {
+         _status = JobStatus.Stopped;
+         _stop = true;
       }
    }
 }
