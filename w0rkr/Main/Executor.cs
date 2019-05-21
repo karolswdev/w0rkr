@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using w0rkr.Configuration;
+using w0rkr.Helpers;
 using w0rkr.Jobs;
 
 namespace w0rkr.Main
@@ -39,25 +41,51 @@ namespace w0rkr.Main
          var tasks = _config.GetSection("Jobs").GetChildren().ToArray().Select(t => t.Value);
          var enumerable = tasks as string[] ?? tasks.ToArray();
          _tasks = enumerable;
-         foreach (var task in enumerable)
-         {
-            WriteString($"Found task {task}");
-         }
+         WriteString($"Found tasks to do: {string.Join(",", _tasks)}", ConsoleColor.Red);
       }
 
       public void Work()
       {
-         var work = GenerateWorkForTasks();
-         WriteString($"Matched the following ");
+            var work = GenerateWorkMappingsForTasks();
+
+            foreach (var match in work)
+            {
+               WriteString($"{match.RequestedTask} -> {match.SupportedType}", ConsoleColor.Red);
+            }
+            WriteString("----------");
+
+            foreach (var match in work)
+            {
+               var job = (IJob) Activator.CreateInstance(match.SupportedType);
+               job.SetExecutor(this);
+               WriteString($"Instantiated {match.SupportedType}");
+               _jobs.Add(job);
+            }
+
+            foreach (var job in _jobs)
+            {
+               WriteString($"Writing configuration into {job.Name}");
+               var result = job.LoadConfig(_config);
+               WriteString($"Configuration load result is {result.Status}. The message is {result.Message}");
+               if (result.Status)
+               {
+                  WriteString($"Starting job {job.Name}", ConsoleColor.Red);
+                  Task.Run(() =>
+                  {
+                     job.Start();
+                  });
+
+               }
+            }
 
       }
 
-      private IList<Type> GenerateWorkForTasks()
+      private IList<JobMatch> GenerateWorkMappingsForTasks()
       {
-         var retList = new List<Type>();
+         var retList = new List<JobMatch>();
          foreach (var task in _tasks)
          {
-            retList.AddRange(_supportedJobs.Where(j => j.ToString().ToLower().Contains(task.ToLower())));
+            retList.AddRange(_supportedJobs.Where(j => j.ToString().ToLower().Contains(task.ToLower())).Select(t => new JobMatch() { RequestedTask = task, SupportedType = t}));
          }
 
          return retList;
@@ -107,14 +135,15 @@ namespace w0rkr.Main
 
       #region "Helper function to output to console"
 
-      public void WriteString(string text)
+      public void WriteString(string text, ConsoleColor color = ConsoleColor.Gray)
       {
          if (_options.Quiet)
          {
             return;
          }
-
+         Console.ForegroundColor = color;
          Console.WriteLine($"[{DateTime.Now}]: {text}");
+         Console.ResetColor();
       }
 
       #endregion

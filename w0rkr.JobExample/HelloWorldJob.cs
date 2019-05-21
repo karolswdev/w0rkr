@@ -23,7 +23,7 @@ namespace w0rkr.JobExample
          _executor = executor;
       }
 
-      public IConfigurationLoadResult LoadConfig(IConfigurationRoot config)
+      public IConfigurationLoadResult LoadConfig(IConfiguration config)
       {
          return new ConfigurationLoadResult(true, "All good!");
       }

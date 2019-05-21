@@ -6,7 +6,7 @@ namespace w0rkr.Jobs
    public interface IJob
    {
       string Name { get; }
-      IConfigurationLoadResult LoadConfig(IConfigurationRoot config);
+      IConfigurationLoadResult LoadConfig(IConfiguration config);
       void Start();
       void Stop();
       JobStatus GetStatus();

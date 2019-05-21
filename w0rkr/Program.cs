@@ -25,7 +25,7 @@ namespace w0rkr
       {
          if (!_startupOptions.Quiet)
          {
-            Console.WriteLine(FiggleFonts.DotMatrix.Render("w0rkr"));
+            Console.WriteLine(FiggleFonts.Train.Render("w0rkr"));
             Console.WriteLine($"Detected OS: {RuntimeInformation.OSDescription}");
             Console.WriteLine($"Started {DateTime.Now}");
          }

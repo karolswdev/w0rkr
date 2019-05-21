@@ -1,8 +1,8 @@
 ﻿{
-   "jobs": [ "MoveFile" ],
+   "jobs": [ "MoveFile", "HelloWorld" ],
    "MoveFile": {
-      "FromDirectory": "C:\temp",
-      "ToDirectory": "C:\temp\boo",
+      "FromDirectory": "C:\\temp",
+      "ToDirectory": "C:\\temp\\boo",
       "ScanInterval": 300,
       "FileFilter":  "*.*" 
    }

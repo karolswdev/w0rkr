@@ -49,7 +49,7 @@ namespace w0rkr.Jobs
          _status = JobStatus.Pending;
       }
 
-      public IConfigurationLoadResult LoadConfig(IConfigurationRoot config)
+      public IConfigurationLoadResult LoadConfig(IConfiguration config)
       {
          _status = JobStatus.CorruptConfiguration;
 
@@ -136,7 +136,7 @@ namespace w0rkr.Jobs
                try
                {
                   _executor.WriteString($"Moving file {file}");
-                  File.Move(file, $"{_toDirectory}/{fi.Name}");
+                  File.Move(file, $"{_toDirectory}\\{fi.Name}");
                   _executor.WriteString($"Filed moved {file}");
                }
                catch (Exception)
