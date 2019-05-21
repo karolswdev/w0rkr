@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,21 +12,58 @@ namespace w0rkr.Main
    {
       private IList<Type> _supportedJobs;
       private readonly StartupOptions _options;
-      private readonly IConfigurationRoot _config;
+      private readonly IConfiguration _config;
+      private IEnumerable<string> _tasks;
+      private readonly IList<IJob> _jobs;
 
       public Executor(StartupOptions options)
       {
          _options = options;
          WriteString("Starting Executor");
+         _config = new ConfigurationBuilder().AddJsonFile("w0rkr.config.json").Build();
+         _jobs = new List<IJob>();
       }
 
       public void Start()
       {
          LoadExternalJobs();
          LoadJobs();
+         PrintJobs();
+         LoadTasks();
+         Work();
       }
 
-      public void PrintJobs()
+      private void LoadTasks()
+      {
+         WriteString("Loading tasks");
+         var tasks = _config.GetSection("Jobs").GetChildren().ToArray().Select(t => t.Value);
+         var enumerable = tasks as string[] ?? tasks.ToArray();
+         _tasks = enumerable;
+         foreach (var task in enumerable)
+         {
+            WriteString($"Found task {task}");
+         }
+      }
+
+      public void Work()
+      {
+         var work = GenerateWorkForTasks();
+         WriteString($"Matched the following ");
+
+      }
+
+      private IList<Type> GenerateWorkForTasks()
+      {
+         var retList = new List<Type>();
+         foreach (var task in _tasks)
+         {
+            retList.AddRange(_supportedJobs.Where(j => j.ToString().ToLower().Contains(task.ToLower())));
+         }
+
+         return retList;
+      }
+
+      private void PrintJobs()
       {
          if (_options.Quiet)
          {
@@ -71,7 +107,7 @@ namespace w0rkr.Main
 
       #region "Helper function to output to console"
 
-      private void WriteString(string text)
+      public void WriteString(string text)
       {
          if (_options.Quiet)
          {
@@ -82,7 +118,6 @@ namespace w0rkr.Main
       }
 
       #endregion
-
 
    }
 }

@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.Extensions.Configuration;
 using w0rkr.Jobs;
+using w0rkr.Main;
 
 namespace w0rkr.JobExample
 {
@@ -10,11 +11,18 @@ namespace w0rkr.JobExample
       public string Name => "HelloWorld";
 
       private JobStatus _status;
+      private Executor _executor;
 
       public HelloWorldJob()
       {
          _status = JobStatus.Pending;
       }
+
+      public void SetExecutor(Executor executor)
+      {
+         _executor = executor;
+      }
+
       public IConfigurationLoadResult LoadConfig(IConfigurationRoot config)
       {
          return new ConfigurationLoadResult(true, "All good!");

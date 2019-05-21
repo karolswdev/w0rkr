@@ -9,6 +9,13 @@
     <PackageReference Include="Args" Version="1.2.1" />
     <PackageReference Include="Figgle" Version="0.3.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="w0rkr.config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

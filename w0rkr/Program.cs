@@ -16,8 +16,6 @@ namespace w0rkr
 
          var executor = new Executor(_startupOptions);
          executor.Start();
-         executor.PrintJobs();
-
          Console.ReadKey();
       }
 

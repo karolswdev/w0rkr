@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using w0rkr.Main;
 
 namespace w0rkr.Jobs
 {
@@ -9,5 +10,6 @@ namespace w0rkr.Jobs
       void Start();
       void Stop();
       JobStatus GetStatus();
+      void SetExecutor(Executor executor);
    }
 }
