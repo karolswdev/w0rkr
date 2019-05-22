@@ -10,13 +10,33 @@ using w0rkr.Jobs;
 
 namespace w0rkr.Main
 {
-   public class Executor
+   public class Executor : IExecutor
    {
       private IList<Type> _supportedJobs;
       private readonly StartupOptions _options;
       private readonly IConfiguration _config;
       private IEnumerable<string> _tasks;
       private readonly IList<IJob> _jobs;
+
+      public void SendMessage(IJob from, string message, MessageType type = MessageType.Information)
+      {
+         switch (type)
+         {
+            case MessageType.Information: Console.ForegroundColor = ConsoleColor.White;
+               break;
+            case MessageType.Error: Console.ForegroundColor = ConsoleColor.Red;
+               break;
+            case MessageType.Verbose: Console.ForegroundColor = ConsoleColor.DarkGray;
+               break;
+            case MessageType.Warning: Console.ForegroundColor = ConsoleColor.DarkYellow;
+               break;
+            default: Console.ForegroundColor = ConsoleColor.White;
+               break;
+         }
+
+         Console.WriteLine($"[{from.Name} -> [{DateTime.Now}]: {message}");
+         Console.ResetColor();
+      }
 
       public Executor(StartupOptions options)
       {
@@ -44,7 +64,7 @@ namespace w0rkr.Main
          WriteString($"Found tasks to do: {string.Join(",", _tasks)}", ConsoleColor.Red);
       }
 
-      public void Work()
+      private void Work()
       {
             var work = GenerateWorkMappingsForTasks();
 
@@ -77,7 +97,6 @@ namespace w0rkr.Main
 
                }
             }
-
       }
 
       private IList<JobMatch> GenerateWorkMappingsForTasks()
