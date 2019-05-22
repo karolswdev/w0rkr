@@ -10,13 +10,28 @@ using w0rkr.Jobs;
 
 namespace w0rkr.Main
 {
-   public class Executor : IExecutor
+   internal class Executor : IExecutor
    {
+
+      #region "Jobs and tasks"
+
       private IList<Type> _supportedJobs;
+      private IEnumerable<string> _tasks;
+
+      #endregion
+
+      #region "All ran/running/stopped jobs"
+
+      private readonly IList<IJob> _jobs;
+
+      #endregion
+
+      #region "Startup options and configuration"
+
       private readonly StartupOptions _options;
       private readonly IConfiguration _config;
-      private IEnumerable<string> _tasks;
-      private readonly IList<IJob> _jobs;
+
+      #endregion
 
       public void SendMessage(IJob from, string message, MessageType type = MessageType.Information)
       {
@@ -34,15 +49,26 @@ namespace w0rkr.Main
                break;
          }
 
-         Console.WriteLine($"[{from.Name} -> [{DateTime.Now}]: {message}");
+         Console.WriteLine($"[{DateTime.Now}] -> [{from.Name}]: {message}");
          Console.ResetColor();
       }
 
       public Executor(StartupOptions options)
       {
+         // Store options passed by factory
          _options = options;
-         WriteString("Starting Executor");
-         _config = new ConfigurationBuilder().AddJsonFile("w0rkr.config.json").Build();
+         // If user provided the /c switch, the below will not be empty and another file name will be used
+         // to build the configuration
+         if (String.IsNullOrEmpty(_options.ConfigFile))
+         {
+            WriteToConsole("Using default configuration file, no alternate file supplied.");
+            _config = new ConfigurationBuilder().AddJsonFile("w0rkr.config.json").Build();
+         }
+         else
+         {
+            WriteToConsole("Using alternate configuration file.");
+            _config = new ConfigurationBuilder().AddJsonFile(_options.ConfigFile).Build();
+         }
          _jobs = new List<IJob>();
       }
 
@@ -55,13 +81,23 @@ namespace w0rkr.Main
          Work();
       }
 
+      public void Stop()
+      {
+         throw new NotImplementedException();
+      }
+
+      public IReadOnlyCollection<IJobStatus> GetJobStatus()
+      {
+         throw new NotImplementedException();
+      }
+
       private void LoadTasks()
       {
-         WriteString("Loading tasks");
-         var tasks = _config.GetSection("Jobs").GetChildren().ToArray().Select(t => t.Value);
+         WriteToConsole("Loading tasks");
+         var tasks = _config.GetSection("tasks").GetChildren().ToArray().Select(t => t.Value);
          var enumerable = tasks as string[] ?? tasks.ToArray();
          _tasks = enumerable;
-         WriteString($"Found tasks to do: {string.Join(",", _tasks)}", ConsoleColor.Red);
+         WriteToConsole($"Found tasks to do: {string.Join(",", _tasks)}", ConsoleColor.Red);
       }
 
       private void Work()
@@ -70,26 +106,26 @@ namespace w0rkr.Main
 
             foreach (var match in work)
             {
-               WriteString($"{match.RequestedTask} -> {match.SupportedType}", ConsoleColor.Red);
+               WriteToConsole($"{match.RequestedTask} -> {match.SupportedType}", ConsoleColor.Red);
             }
-            WriteString("----------");
+            WriteToConsole("----------");
 
             foreach (var match in work)
             {
                var job = (IJob) Activator.CreateInstance(match.SupportedType);
                job.SetExecutor(this);
-               WriteString($"Instantiated {match.SupportedType}");
+               WriteToConsole($"Instantiated {match.SupportedType}");
                _jobs.Add(job);
             }
 
             foreach (var job in _jobs)
             {
-               WriteString($"Writing configuration into {job.Name}");
+               WriteToConsole($"Writing configuration into {job.Name}");
                var result = job.LoadConfig(_config);
-               WriteString($"Configuration load result is {result.Status}. The message is {result.Message}");
+               WriteToConsole($"Configuration load result is {result.Status}. The message is {result.Message}");
                if (result.Status)
                {
-                  WriteString($"Starting job {job.Name}", ConsoleColor.Red);
+                  WriteToConsole($"Starting job {job.Name}", ConsoleColor.Red);
                   Task.Run(() =>
                   {
                      job.Start();
@@ -99,6 +135,12 @@ namespace w0rkr.Main
             }
       }
 
+      /// <summary>
+      /// Generates mappings between tasks to perform and actual loaded and supported jobs.
+      /// Used to map and start any given units of work.
+      /// Essential method.
+      /// </summary>
+      /// <returns>A list of <see cref="JobMatch"/> that can then be used to instantiate units of work</returns>
       private IList<JobMatch> GenerateWorkMappingsForTasks()
       {
          var retList = new List<JobMatch>();
@@ -110,6 +152,10 @@ namespace w0rkr.Main
          return retList;
       }
 
+      /// <summary>
+      /// Prints the supported jobs into console.
+      /// Takes <see cref="StartupOptions"/> into consideration for quiet operations
+      /// </summary>
       private void PrintJobs()
       {
          if (_options.Quiet)
@@ -119,14 +165,14 @@ namespace w0rkr.Main
 
          foreach (var supportedJob in _supportedJobs)
          {
-            WriteString($"Found {supportedJob}");
+            WriteToConsole($"Found {supportedJob}");
          }
       }
 
       #region "Loading of plugins and internal jobs"
       private void LoadJobs()
       {
-         WriteString("Loading support for jobs");
+         WriteToConsole("Loading support for jobs");
          _supportedJobs = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(s => s.GetTypes())
             .Where(p => typeof(IJob).IsAssignableFrom(p)).Where(p => !p.IsInterface).ToList();
@@ -134,10 +180,10 @@ namespace w0rkr.Main
 
       private void LoadExternalJobs()
       {
-         WriteString("Loading external job plug-ins");
+         WriteToConsole("Loading external job plug-ins");
          if (!Directory.Exists("./jobs"))
          {
-            WriteString("No jobs/ directory. Cannot load external job plug-ins.");
+            WriteToConsole("No jobs/ directory. Cannot load external job plug-ins.");
             return;
          }
 
@@ -154,7 +200,7 @@ namespace w0rkr.Main
 
       #region "Helper function to output to console"
 
-      public void WriteString(string text, ConsoleColor color = ConsoleColor.Gray)
+      public void WriteToConsole(string text, ConsoleColor color = ConsoleColor.Gray)
       {
          if (_options.Quiet)
          {

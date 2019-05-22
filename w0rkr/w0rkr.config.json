@@ -1,9 +1,13 @@
 ﻿{
-   "jobs": [ "MoveFile", "HelloWorld" ],
-   "MoveFile": {
-      "FromDirectory": "C:\\temp",
-      "ToDirectory": "C:\\temp\\boo",
-      "ScanInterval": 300,
-      "FileFilter":  "*.*" 
+   "tasks": [ "MoveFile", "HelloWorld" ],
+   "pluginDirectory": "jobs/",
+
+   "TaskConfig":  {
+      "MoveFile": {
+         "FromDirectory": "C:\\temp",
+         "ToDirectory": "C:\\temp\\boo",
+         "ScanInterval": 300,
+         "FileFilter": "*.*"
+      }
    }
 }

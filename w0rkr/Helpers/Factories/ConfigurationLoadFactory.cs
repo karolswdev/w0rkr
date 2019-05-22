@@ -1,6 +1,6 @@
 ﻿ using w0rkr.Jobs;
 
-namespace w0rkr.Helpers
+namespace w0rkr.Helpers.Factories
 {
    public static class ConfigurationLoadFactory
    {

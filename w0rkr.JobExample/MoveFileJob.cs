@@ -3,15 +3,17 @@ using System.IO;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
 using w0rkr.Helpers;
+using w0rkr.Helpers.Factories;
+using w0rkr.Jobs;
 using w0rkr.Main;
 
-namespace w0rkr.Jobs
+namespace w0rkr.JobExample
 {
    public class MoveFileJob : IJob
    {
       public string Name => "MoveFile";
 
-      private Executor _executor;
+      private IExecutor _executor;
 
       #region "MoveFile configuration specific fields"
 
@@ -39,9 +41,10 @@ namespace w0rkr.Jobs
          return _status;
       }
 
-      public void SetExecutor(Executor executor)
+      public void SetExecutor(IExecutor executor)
       {
          _executor = executor;
+         _executor.SendMessage(this, "Successfully coupled with executor", MessageType.Verbose);
       }
 
       public MoveFileJob()
@@ -135,13 +138,13 @@ namespace w0rkr.Jobs
                var fi = new FileInfo(file);
                try
                {
-                  _executor.WriteString($"Moving file {file}");
+                  _executor.SendMessage(this, $"Moving file {file}", MessageType.Information);
                   File.Move(file, $"{_toDirectory}\\{fi.Name}");
-                  _executor.WriteString($"Filed moved {file}");
+                  _executor.SendMessage(this, $"Filed moved {file}", MessageType.Information);
                }
                catch (Exception)
                {
-                  _executor.WriteString("Error when moving file. Job stopping.");
+                  _executor.SendMessage(this, "Error when moving file. Job stopping.", MessageType.Error);
                   _status = JobStatus.Crashed;
                   _stop = true;
                }

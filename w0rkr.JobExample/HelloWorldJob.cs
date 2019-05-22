@@ -11,14 +11,14 @@ namespace w0rkr.JobExample
       public string Name => "HelloWorld";
 
       private JobStatus _status;
-      private Executor _executor;
+      private IExecutor _executor;
 
       public HelloWorldJob()
       {
          _status = JobStatus.Pending;
       }
 
-      public void SetExecutor(Executor executor)
+      public void SetExecutor(IExecutor executor)
       {
          _executor = executor;
       }
@@ -31,7 +31,7 @@ namespace w0rkr.JobExample
       public void Start()
       {
          _status = JobStatus.Working;
-         Console.WriteLine("Hello World!");
+         _executor.SendMessage(this, "Hello world!", MessageType.Information);
          _status = JobStatus.Pending;
       }
 

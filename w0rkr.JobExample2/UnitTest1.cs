@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace w0rkr.Tests
+namespace Tests
 {
    public class Tests
    {
