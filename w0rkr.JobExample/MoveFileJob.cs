@@ -2,25 +2,15 @@
 using System.IO;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
-using w0rkr.Helpers;
+using w0rkr.Helpers.Factories;
+using w0rkr.Jobs;
 using w0rkr.Main;
 
-namespace w0rkr.Jobs
+namespace w0rkr.JobExample
 {
    public class MoveFileJob : IJob
    {
-      public string Name => "MoveFile";
-
-      private Executor _executor;
-
-      #region "MoveFile configuration specific fields"
-
-      private string _fromDirectory;
-      private string _toDirectory;
-      private int _scanInterval;
-      private string _fileFilter;
-
-      #endregion
+      private IExecutor _executor;
 
       #region "Status related fields"
 
@@ -34,19 +24,22 @@ namespace w0rkr.Jobs
 
       #endregion
 
+      public MoveFileJob()
+      {
+         _status = JobStatus.Pending;
+      }
+
+      public string Name => "MoveFile";
+
       public JobStatus GetStatus()
       {
          return _status;
       }
 
-      public void SetExecutor(Executor executor)
+      public void SetExecutor(IExecutor executor)
       {
          _executor = executor;
-      }
-
-      public MoveFileJob()
-      {
-         _status = JobStatus.Pending;
+         _executor.SendMessage(this, "Successfully coupled with executor", MessageType.Verbose);
       }
 
       public IConfigurationLoadResult LoadConfig(IConfiguration config)
@@ -103,7 +96,7 @@ namespace w0rkr.Jobs
 
          #region "fileFilter checks"
 
-         if (String.IsNullOrEmpty(config["MoveFile:fileFilter"])) 
+         if (String.IsNullOrEmpty(config["MoveFile:fileFilter"]))
          {
             return ConfigurationLoadFactory.Get(false, "the FileFilter is not set for this job type.");
          }
@@ -112,7 +105,7 @@ namespace w0rkr.Jobs
 
          #endregion
 
-        _status = JobStatus.Pending;
+         _status = JobStatus.Pending;
 
          return ConfigurationLoadFactory.Get(true, "All configuration loaded and ready to work.");
       }
@@ -135,13 +128,13 @@ namespace w0rkr.Jobs
                var fi = new FileInfo(file);
                try
                {
-                  _executor.WriteString($"Moving file {file}");
+                  _executor.SendMessage(this, $"Moving file {file}", MessageType.Information);
                   File.Move(file, $"{_toDirectory}\\{fi.Name}");
-                  _executor.WriteString($"Filed moved {file}");
+                  _executor.SendMessage(this, $"Filed moved {file}", MessageType.Information);
                }
                catch (Exception)
                {
-                  _executor.WriteString("Error when moving file. Job stopping.");
+                  _executor.SendMessage(this, "Error when moving file. Job stopping.", MessageType.Error);
                   _status = JobStatus.Crashed;
                   _stop = true;
                }
@@ -154,5 +147,14 @@ namespace w0rkr.Jobs
          _status = JobStatus.Stopped;
          _stop = true;
       }
+
+      #region "MoveFile configuration specific fields"
+
+      private string _fromDirectory;
+      private string _toDirectory;
+      private int _scanInterval;
+      private string _fileFilter;
+
+      #endregion
    }
 }

@@ -2,13 +2,13 @@
 {
    public class ConfigurationLoadResult : IConfigurationLoadResult
    {
-      public bool Status { get; }
-      public string Message { get; }
-
       public ConfigurationLoadResult(bool status, string message)
       {
          Message = message;
          Status = status;
       }
+
+      public bool Status { get; }
+      public string Message { get; }
    }
 }

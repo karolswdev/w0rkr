@@ -10,6 +10,6 @@ namespace w0rkr.Jobs
       void Start();
       void Stop();
       JobStatus GetStatus();
-      void SetExecutor(Executor executor);
+      void SetExecutor(IExecutor executor);
    }
 }
