@@ -48,12 +48,12 @@ namespace w0rkr.JobExample
 
          #region "fromDirectory checks"
 
-         if (String.IsNullOrEmpty(config["MoveFile:fromDirectory"]))
+         if (String.IsNullOrEmpty(config["Tasks:MoveFile:fromDirectory"]))
          {
             return ConfigurationLoadFactory.Get(false, "the FromDirectory is not set for this job type.");
          }
 
-         _fromDirectory = config["MoveFile:fromDirectory"];
+         _fromDirectory = config["Tasks:MoveFile:fromDirectory"];
 
          if (!Directory.Exists(_fromDirectory))
          {
@@ -64,14 +64,14 @@ namespace w0rkr.JobExample
 
          #region "toDirectory checks"
 
-         _toDirectory = config["MoveFile:toDirectory"];
+         _toDirectory = config["Tasks:MoveFile:toDirectory"];
 
          if (!Directory.Exists(_toDirectory))
          {
             return ConfigurationLoadFactory.Get(false, "the ToDirectory is not found on this filesystem.");
          }
 
-         if (String.IsNullOrEmpty(config["MoveFile:toDirectory"]))
+         if (String.IsNullOrEmpty(config["Tasks:MoveFile:toDirectory"]))
          {
             return ConfigurationLoadFactory.Get(false, "the ToDirectory is not set for this job type.");
          }
@@ -80,12 +80,12 @@ namespace w0rkr.JobExample
 
          #region "scanInterval checks"
 
-         if (String.IsNullOrEmpty(config["MoveFile:scanInterval"]))
+         if (String.IsNullOrEmpty(config["Tasks:MoveFile:scanInterval"]))
          {
             return ConfigurationLoadFactory.Get(false, "the ScanInterval is not set for this job type.");
          }
 
-         if (!Int32.TryParse(config["MoveFile:scanInterval"], out int interval))
+         if (!Int32.TryParse(config["Tasks:MoveFile:scanInterval"], out int interval))
          {
             return ConfigurationLoadFactory.Get(false, "the ScanInterval is not correct.");
          }
@@ -96,12 +96,12 @@ namespace w0rkr.JobExample
 
          #region "fileFilter checks"
 
-         if (String.IsNullOrEmpty(config["MoveFile:fileFilter"]))
+         if (String.IsNullOrEmpty(config["Tasks:MoveFile:fileFilter"]))
          {
             return ConfigurationLoadFactory.Get(false, "the FileFilter is not set for this job type.");
          }
 
-         _fileFilter = config["MoveFile:fileFilter"];
+         _fileFilter = config["Tasks:MoveFile:fileFilter"];
 
          #endregion
 
