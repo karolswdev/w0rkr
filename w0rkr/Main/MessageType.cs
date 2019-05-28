@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace w0rkr.Main
+﻿namespace w0rkr.Main
 {
    public enum MessageType
    {

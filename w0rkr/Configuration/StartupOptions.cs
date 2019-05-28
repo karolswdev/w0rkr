@@ -1,11 +1,9 @@
-﻿
-
-namespace w0rkr.Configuration
+﻿namespace w0rkr.Configuration
 {
    // ReSharper disable once ClassNeverInstantiated.Global
    // Handled by Args (NuGet)
    /// <summary>
-   /// Used to parse startup arguments 
+   ///    Used to parse startup arguments
    /// </summary>
    public class StartupOptions
    {

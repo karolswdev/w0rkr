@@ -1,22 +1,20 @@
-﻿using System;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Microsoft.Extensions.Configuration;
-using w0rkr.Jobs;
+﻿using w0rkr.Jobs;
 using w0rkr.Main;
 
 namespace w0rkr.JobExample
 {
    public class HelloWorldJob : IJob
    {
-      public string Name => "HelloWorld";
+      private IExecutor _executor;
 
       private JobStatus _status;
-      private IExecutor _executor;
 
       public HelloWorldJob()
       {
          _status = JobStatus.Pending;
       }
+
+      public string Name => "HelloWorld";
 
       public void SetExecutor(IExecutor executor)
       {

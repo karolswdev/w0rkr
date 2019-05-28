@@ -1,4 +1,4 @@
-﻿ using w0rkr.Jobs;
+﻿using w0rkr.Jobs;
 
 namespace w0rkr.Helpers.Factories
 {

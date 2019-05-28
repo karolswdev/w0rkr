@@ -1,9 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading;
-using Microsoft.Extensions.Configuration;
-using w0rkr.Helpers;
-using w0rkr.Helpers.Factories;
+﻿using w0rkr.Helpers.Factories;
 using w0rkr.Jobs;
 using w0rkr.Main;
 
@@ -11,18 +6,7 @@ namespace w0rkr.JobExample
 {
    public class MoveFileJob : IJob
    {
-      public string Name => "MoveFile";
-
       private IExecutor _executor;
-
-      #region "MoveFile configuration specific fields"
-
-      private string _fromDirectory;
-      private string _toDirectory;
-      private int _scanInterval;
-      private string _fileFilter;
-
-      #endregion
 
       #region "Status related fields"
 
@@ -36,6 +20,13 @@ namespace w0rkr.JobExample
 
       #endregion
 
+      public MoveFileJob()
+      {
+         _status = JobStatus.Pending;
+      }
+
+      public string Name => "MoveFile";
+
       public JobStatus GetStatus()
       {
          return _status;
@@ -45,11 +36,6 @@ namespace w0rkr.JobExample
       {
          _executor = executor;
          _executor.SendMessage(this, "Successfully coupled with executor", MessageType.Verbose);
-      }
-
-      public MoveFileJob()
-      {
-         _status = JobStatus.Pending;
       }
 
       public IConfigurationLoadResult LoadConfig(IConfiguration config)
@@ -106,7 +92,7 @@ namespace w0rkr.JobExample
 
          #region "fileFilter checks"
 
-         if (String.IsNullOrEmpty(config["MoveFile:fileFilter"])) 
+         if (String.IsNullOrEmpty(config["MoveFile:fileFilter"]))
          {
             return ConfigurationLoadFactory.Get(false, "the FileFilter is not set for this job type.");
          }
@@ -115,7 +101,7 @@ namespace w0rkr.JobExample
 
          #endregion
 
-        _status = JobStatus.Pending;
+         _status = JobStatus.Pending;
 
          return ConfigurationLoadFactory.Get(true, "All configuration loaded and ready to work.");
       }
@@ -157,5 +143,14 @@ namespace w0rkr.JobExample
          _status = JobStatus.Stopped;
          _stop = true;
       }
+
+      #region "MoveFile configuration specific fields"
+
+      private string _fromDirectory;
+      private string _toDirectory;
+      private int _scanInterval;
+      private string _fileFilter;
+
+      #endregion
    }
 }
