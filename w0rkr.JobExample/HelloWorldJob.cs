@@ -1,4 +1,5 @@
-﻿using w0rkr.Jobs;
+﻿using Microsoft.Extensions.Configuration;
+using w0rkr.Jobs;
 using w0rkr.Main;
 
 namespace w0rkr.JobExample

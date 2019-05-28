@@ -1,3 +1,5 @@
+using NUnit.Framework;
+
 namespace w0rkr.Tests
 {
    public class Tests
